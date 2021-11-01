@@ -1,8 +1,13 @@
 cdinout_prompt_command() {
-    if [ "$CDINOUT_PATH" == "$PWD" ]; then
-        echo "same dir"
-        return
-    fi   
+    CURDIR="$PWD"
+    until [ "$CURDIR" = "" ]; do
+        if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
+            echo "same dir $CURDIR"
+            return
+        fi
+
+        CURDIR="${CURDIR%/*}"
+    done
 
     cmdinout_execute_out
     cmdinout_execute_in 
