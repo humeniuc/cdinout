@@ -1,0 +1,3 @@
+LOCAL_BIN=/home/gabi/work/project/cinemagia/.workspace/bin
+export PATH="$LOCAL_BIN:$PATH"
+export MYVAR="this is cinemagia"
