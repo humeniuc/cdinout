@@ -2,7 +2,6 @@ cdinout_prompt_command() {
     CURDIR="$PWD"
     until [ "$CURDIR" = "" ]; do
         if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
-            echo "same dir $CURDIR"
             return
         fi
 
@@ -20,7 +19,6 @@ cmdinout_execute_out() {
 
         # Build path to the out script
         CDINOUT_OUT_PATH="$HOME/.cdinout/scripts/$DIR/out.sh"
-        echo "CDINOUT_OUT_PATH=$CDINOUT_OUT_PATH"
 
         # Run the out script if exists
         if [ -f "$CDINOUT_OUT_PATH" ]; then

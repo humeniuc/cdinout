@@ -1,1 +1,6 @@
-echo cinemagia out
+# set -x
+LOCAL_BIN=/path/to/project/.workspace/bin
+LOCAL_BIN_ESCAPED=$( printf "%s" "$LOCAL_BIN" | sed 's/[]\/$*.^[]/\\&/g' )
+export PATH=$( printf "%s" "$PATH" | sed -e 's/\(^\|:\)'$LOCAL_BIN_ESCAPED'\(:\|$\)/:/g' -e 's/::*/:/g' -e 's/^://' -e 's/:$//')
+unset PROJECT_NAME
+unset _Z_DATA

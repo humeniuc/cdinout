@@ -1,3 +1,4 @@
-LOCAL_BIN=/path/to/project/root/.workspace/bin
+LOCAL_BIN="/path/to/project/.workspace/bin"
 export PATH="$LOCAL_BIN:$PATH"
-export MYVAR="this is project"
+export PROJECT_NAME="my_project_name"
+export _Z_DATA="/path/to/project/.workspace/var/.z"
