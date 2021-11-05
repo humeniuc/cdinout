@@ -1,3 +1,5 @@
+# shellcheck shell=bash
+
 cdinout_prompt_command() {
     local CURDIR="$PWD"
     until [ "$CURDIR" = "" ]; do
@@ -19,7 +21,8 @@ cdinout_prompt_command() {
     # Out method
     _cdinout_out() {
         if [ -v "CDINOUT_PATH" ]; then
-            local CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
+            local CDINOUT_OUT_PATH
+            CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
             # TODO: Check CDINOUT_OUT_PATH is a $HOME/.cdinout/scripts
 
             # Run the out script if exists
@@ -37,12 +40,13 @@ cdinout_prompt_command() {
     _cdinout_in() {
         CURDIR="$PWD"
         until [ "$CURDIR" = "" ]; do
-            local CDINOUT_IN_PATH="$(_cdinout_dir_path "$CURDIR")/in.sh"
+            local CDINOUT_IN_PATH
+            CDINOUT_IN_PATH="$(_cdinout_dir_path "$CURDIR")/in.sh"
 
             # Run the in script, if exists.
             # Set the env var.
             if [ -f "$CDINOUT_IN_PATH" ]; then
-                source $CDINOUT_IN_PATH
+                source "$CDINOUT_IN_PATH"
                 export CDINOUT_PATH="$CURDIR"
                 break;
             fi
