@@ -1,5 +1,5 @@
 cdinout_prompt_command() {
-    CURDIR="$PWD"
+    local CURDIR="$PWD"
     until [ "$CURDIR" = "" ]; do
         if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
             return
@@ -8,48 +8,55 @@ cdinout_prompt_command() {
         CURDIR="${CURDIR%/*}"
     done
 
-    cmdinout_execute_out
-    cmdinout_execute_in 
-}
-
-cmdinout_execute_out() {
-    if [ -v "CDINOUT_PATH" ]; then
+    _cdinout_dir_path() {
         # Remove first slash
-        DIR="${CDINOUT_PATH/\//}"
+        DIR="${1/\//}"
 
         # Build path to the out script
-        CDINOUT_OUT_PATH="$HOME/.cdinout/scripts/$DIR/out.sh"
+        echo "$HOME/.cdinout/scripts/$DIR"
+    }
 
-        # Run the out script if exists
-        if [ -f "$CDINOUT_OUT_PATH" ]; then
-            source "$CDINOUT_OUT_PATH"
-        fi
+    # Out method
+    _cdinout_out() {
+        if [ -v "CDINOUT_PATH" ]; then
+            local CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
+            # TODO: Check CDINOUT_OUT_PATH is a $HOME/.cdinout/scripts
 
-        unset "CDINOUT_PATH"
-    fi   
+            # Run the out script if exists
+            if [ -f "$CDINOUT_OUT_PATH" ]; then
+                source "$CDINOUT_OUT_PATH"
+            fi
 
-    return
-}
+            unset "CDINOUT_PATH"
+        fi   
 
-cmdinout_execute_in() {
-    CURDIR="$PWD"
-    until [ "$CURDIR" = "" ]; do
-        # Remove first slash
-        DIR="${CURDIR/\//}"
+        return
+    }
 
-        # Build path to the in script
-        CDINOUT_IN_PATH="$HOME/.cdinout/scripts/$DIR/in.sh"
+    # In method
+    _cdinout_in() {
+        CURDIR="$PWD"
+        until [ "$CURDIR" = "" ]; do
+            local CDINOUT_IN_PATH="$(_cdinout_dir_path "$CURDIR")/in.sh"
 
-        # Run the in script, if exists.
-        # Set the env var.
-        if [ -f "$CDINOUT_IN_PATH" ]; then
-            source $CDINOUT_IN_PATH
-            export CDINOUT_PATH="$CURDIR"
-            break;
-        fi
+            # Run the in script, if exists.
+            # Set the env var.
+            if [ -f "$CDINOUT_IN_PATH" ]; then
+                source $CDINOUT_IN_PATH
+                export CDINOUT_PATH="$CURDIR"
+                break;
+            fi
 
-        CURDIR="${CURDIR%/*}"
-    done
+            CURDIR="${CURDIR%/*}"
+        done
+    }
+
+    _cdinout_out
+    _cdinout_in
+
+    unset -f _cdinout_dir_path
+    unset -f _cdinout_out
+    unset -f _cdinout_in
 }
 
 cdinout_prompt_command_cmd=$'\n''cdinout_prompt_command'$'\n'
