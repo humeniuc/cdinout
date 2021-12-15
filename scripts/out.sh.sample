@@ -4,3 +4,10 @@ LOCAL_BIN_ESCAPED=$( printf "%s" "$LOCAL_BIN" | sed 's/[]\/$*.^[]/\\&/g' )
 export PATH=$( printf "%s" "$PATH" | sed -e 's/\(^\|:\)'$LOCAL_BIN_ESCAPED'\(:\|$\)/:/g' -e 's/::*/:/g' -e 's/^://' -e 's/:$//')
 unset PROJECT_NAME
 unset _Z_DATA
+
+# Unset env var and restore from backup
+unset XDEBUG_MODE
+[ ! -z "$XDEBUG_MODE_BKP" ] && {
+    export XDEBUG_MODE="$XDEBUG_MODE_BKP"
+    unset XDEBUG_MODE_BKP
+}
