@@ -6,3 +6,13 @@ export _Z_DATA="/path/to/project/.workspace/var/.z"
 # Set an env var with backup
 [ ! -z "$XDEBUG_MODE" ] && export XDEBUG_MODE_BKP="$XDEBUG_MODE"
 export XDEBUG_MODE="off"
+
+# go root
+,gr() {
+    cd "/path/to/root"
+}
+
+# go source
+,gs() {
+    cd "/path/to/root/src"
+}

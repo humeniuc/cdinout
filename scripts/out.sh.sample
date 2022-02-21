@@ -11,3 +11,6 @@ unset XDEBUG_MODE
     export XDEBUG_MODE="$XDEBUG_MODE_BKP"
     unset XDEBUG_MODE_BKP
 }
+
+unset -f ,gr
+unset -f ,gs

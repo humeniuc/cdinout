@@ -1,14 +1,22 @@
 # shellcheck shell=bash
 
 cdinout_prompt_command() {
+    local debug=0
     local CURDIR="$PWD"
-    until [ "$CURDIR" = "" ]; do
-        if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
-            return
-        fi
 
-        CURDIR="${CURDIR%/*}"
-    done
+    [ "$debug" -eq 1 ] && echo ".cdinout: scanning"
+
+    # Test if I am in a $CDINOUT_PATH subdirectory
+    if [ -v "CDINOUT_PATH" ]; then
+        until [ "$CURDIR" = "" ]; do
+            if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
+                [ "$debug" -eq 1 ] && echo ".cdinout: same dir"
+                return
+            fi
+
+            CURDIR="${CURDIR%/*}"
+        done
+    fi
 
     _cdinout_dir_path() {
         # Remove first slash
@@ -20,24 +28,31 @@ cdinout_prompt_command() {
 
     # Out method
     _cdinout_out() {
-        if [ -v "CDINOUT_PATH" ]; then
-            local CDINOUT_OUT_PATH
-            CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
-            # TODO: Check CDINOUT_OUT_PATH is a $HOME/.cdinout/scripts
+        # Not in a special dir. Skip
+        if [ ! -v "CDINOUT_PATH" ]; then
+            return
+        fi
 
-            # Run the out script if exists
-            if [ -f "$CDINOUT_OUT_PATH" ]; then
-                source "$CDINOUT_OUT_PATH"
-            fi
+        local CDINOUT_OUT_PATH
+        CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
+        # TODO: Check CDINOUT_OUT_PATH is a $HOME/.cdinout/scripts
 
-            unset "CDINOUT_PATH"
-        fi   
+        # Run the out script if exists
+        if [ -f "$CDINOUT_OUT_PATH" ]; then
+            [ "$debug" -eq 1 ] && echo ".cdinout: execute $CDINOUT_OUT_PATH"
+            source "$CDINOUT_OUT_PATH"
+        fi
 
-        return
+        unset "CDINOUT_PATH"
     }
 
     # In method
     _cdinout_in() {
+        # Allready in a special dir. Skip
+        if [ -v "CDINOUT_PATH" ]; then
+            return
+        fi
+
         CURDIR="$PWD"
         until [ "$CURDIR" = "" ]; do
             local CDINOUT_IN_PATH
@@ -46,6 +61,7 @@ cdinout_prompt_command() {
             # Run the in script, if exists.
             # Set the env var.
             if [ -f "$CDINOUT_IN_PATH" ]; then
+                [ "$debug" -eq 1 ] && echo ".cdinout: execute $CDINOUT_IN_PATH"
                 source "$CDINOUT_IN_PATH"
                 export CDINOUT_PATH="$CURDIR"
                 break;
@@ -65,3 +81,8 @@ cdinout_prompt_command() {
 
 cdinout_prompt_command_cmd=$'\n''cdinout_prompt_command'$'\n'
 PROMPT_COMMAND="${PROMPT_COMMAND/$cdinout_prompt_command_cmd/}$cdinout_prompt_command_cmd"
+
+# Prevent allready defined env:
+# Ex 1: From a special dir, start bash from bash
+# Ex 2: From a special dir start tmux with working_dir a special dir
+unset "CDINOUT_PATH"
