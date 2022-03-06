@@ -1,16 +1,15 @@
 # shellcheck shell=bash
 
 cdinout_prompt_command() {
-    local debug=0
     local CURDIR="$PWD"
 
-    [ "$debug" -eq 1 ] && echo ".cdinout: scanning"
+    [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: scanning"
 
     # Test if I am in a $CDINOUT_PATH subdirectory
     if [ -v "CDINOUT_PATH" ]; then
         until [ "$CURDIR" = "" ]; do
             if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
-                [ "$debug" -eq 1 ] && echo ".cdinout: same dir"
+                [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: same dir"
                 return
             fi
 
@@ -39,7 +38,7 @@ cdinout_prompt_command() {
 
         # Run the out script if exists
         if [ -f "$CDINOUT_OUT_PATH" ]; then
-            [ "$debug" -eq 1 ] && echo ".cdinout: execute $CDINOUT_OUT_PATH"
+            [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: execute $CDINOUT_OUT_PATH"
             source "$CDINOUT_OUT_PATH"
         fi
 
@@ -61,7 +60,7 @@ cdinout_prompt_command() {
             # Run the in script, if exists.
             # Set the env var.
             if [ -f "$CDINOUT_IN_PATH" ]; then
-                [ "$debug" -eq 1 ] && echo ".cdinout: execute $CDINOUT_IN_PATH"
+                [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: execute $CDINOUT_IN_PATH"
                 source "$CDINOUT_IN_PATH"
                 export CDINOUT_PATH="$CURDIR"
                 break;
@@ -79,7 +78,7 @@ cdinout_prompt_command() {
     unset -f _cdinout_in
 }
 
-cdinout_prompt_command_cmd=$'\n''cdinout_prompt_command'$'\n'
+cdinout_prompt_command_cmd=$'\n''cdinout_prompt_command;'
 PROMPT_COMMAND="${PROMPT_COMMAND/$cdinout_prompt_command_cmd/}$cdinout_prompt_command_cmd"
 
 # Prevent allready defined env:
