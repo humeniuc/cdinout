@@ -1,7 +1,14 @@
-# set -x
-LOCAL_BIN=/path/to/project/.workspace/bin
-LOCAL_BIN_ESCAPED=$( printf "%s" "$LOCAL_BIN" | sed 's/[]\/$*.^[]/\\&/g' )
-export PATH=$( printf "%s" "$PATH" | sed -e 's/\(^\|:\)'$LOCAL_BIN_ESCAPED'\(:\|$\)/:/g' -e 's/::*/:/g' -e 's/^://' -e 's/:$//')
+LOCAL_PATH=/path/to/project/.workspace/bin
+# LOCAL_PATH_ESCAPED=$( printf "%s" "$LOCAL_PATH" | sed 's/[]\/$*.^[]/\\&/g' )
+# export PATH=$( printf "%s" "$PATH" | sed -e 's/\(^\|:\)'$LOCAL_PATH_ESCAPED'\(:\|$\)/:/g' -e 's/::*/:/g' -e 's/^://' -e 's/:$//')
+
+PATH=":$PATH:"
+PATH="${PATH/:$LOCAL_PATH:/:}"
+PATH="${PATH#:}"
+PATH="${PATH%:}"
+export PATH="$PATH"
+unset LOCAL_PATH
+
 unset PROJECT_NAME
 unset _Z_DATA
 
