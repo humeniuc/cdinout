@@ -22,7 +22,7 @@ cdinout_prompt_command() {
         DIR="${1/\//}"
 
         # Build path to the out script
-        echo "$HOME/.cdinout/scripts/$DIR"
+        echo "$HOME/.config/cdinout/paths/$DIR"
     }
 
     # Out method
