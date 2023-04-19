@@ -1,15 +1,21 @@
 # shellcheck shell=bash
 
-cdinout_prompt_command() {
+__cdinout_prompt_command() {
     local CURDIR="$PWD"
+    local CDINOUT_SCRIPTS_PATH="$HOME/.config/cdinout/paths"
 
-    [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: scanning"
+    __cdinout_debug() {
+        [ ! -z "$CDINOUT_DEBUG" ] && echo "CDINOUT: $1" >&2
+    }
+
+    __cdinout_debug "scanning"
 
     # Test if I am in a $CDINOUT_PATH subdirectory
     if [ -v "CDINOUT_PATH" ]; then
         until [ "$CURDIR" = "" ]; do
+            __cdinout_debug "Testing $CURDIR"
             if [ "$CDINOUT_PATH" == "$CURDIR" ]; then
-                [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: same dir"
+                __cdinout_debug "same dir. exit"
                 return
             fi
 
@@ -17,28 +23,28 @@ cdinout_prompt_command() {
         done
     fi
 
-    _cdinout_dir_path() {
+    __cdinout_dir_path() {
         # Remove first slash
         DIR="${1/\//}"
 
         # Build path to the out script
-        echo "$HOME/.config/cdinout/paths/$DIR"
+        echo "$CDINOUT_SCRIPTS_PATH/$DIR"
     }
 
     # Out method
-    _cdinout_out() {
+    __cdinout_out() {
         # Not in a special dir. Skip
         if [ ! -v "CDINOUT_PATH" ]; then
             return
         fi
 
         local CDINOUT_OUT_PATH
-        CDINOUT_OUT_PATH="$(_cdinout_dir_path "$CDINOUT_PATH")/out.sh"
+        CDINOUT_OUT_PATH="$(__cdinout_dir_path "$CDINOUT_PATH")/out.sh"
         # TODO: Check CDINOUT_OUT_PATH is a $HOME/.cdinout/scripts
 
         # Run the out script if exists
         if [ -f "$CDINOUT_OUT_PATH" ]; then
-            [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: execute $CDINOUT_OUT_PATH"
+            __cdinout_debug "execute $CDINOUT_OUT_PATH"
             source "$CDINOUT_OUT_PATH"
         fi
 
@@ -46,7 +52,7 @@ cdinout_prompt_command() {
     }
 
     # In method
-    _cdinout_in() {
+    __cdinout_in() {
         # Allready in a special dir. Skip
         if [ -v "CDINOUT_PATH" ]; then
             return
@@ -55,12 +61,12 @@ cdinout_prompt_command() {
         CURDIR="$PWD"
         until [ "$CURDIR" = "" ]; do
             local CDINOUT_IN_PATH
-            CDINOUT_IN_PATH="$(_cdinout_dir_path "$CURDIR")/in.sh"
+            CDINOUT_IN_PATH="$(__cdinout_dir_path "$CURDIR")/in.sh"
 
             # Run the in script, if exists.
             # Set the env var.
             if [ -f "$CDINOUT_IN_PATH" ]; then
-                [ ! -z "$CDINOUT_DEBUG" ] && echo ".cdinout: execute $CDINOUT_IN_PATH"
+                __cdinout_debug "execute $CDINOUT_IN_PATH"
                 source "$CDINOUT_IN_PATH"
                 export CDINOUT_PATH="$CURDIR"
                 break;
@@ -70,16 +76,22 @@ cdinout_prompt_command() {
         done
     }
 
-    _cdinout_out
-    _cdinout_in
+    __cdinout_out
+    __cdinout_in
 
-    unset -f _cdinout_dir_path
-    unset -f _cdinout_out
-    unset -f _cdinout_in
+    unset -f __cdinout_dir_path
+    unset -f __cdinout_out
+    unset -f __cdinout_in
+    unset -f __cdinout_debug
 }
 
-cdinout_prompt_command_cmd=$'\n''cdinout_prompt_command;'
-PROMPT_COMMAND="${PROMPT_COMMAND/$cdinout_prompt_command_cmd/}$cdinout_prompt_command_cmd"
+# Append command to PROMPT_COMMAND.
+# Some projects tamper with the semicolon at the end, so I have to remove both version before add.
+CDINOUT_CMD=$'\n''__cdinout_prompt_command'
+PROMPT_COMMAND="${PROMPT_COMMAND/$CDINOUT_CMD;/}"
+PROMPT_COMMAND="${PROMPT_COMMAND/$CDINOUT_CMD/}"
+PROMPT_COMMAND="${PROMPT_COMMAND}$CDINOUT_CMD;"
+unset "CDINOUT_CMD"
 
 # Prevent allready defined env:
 # Ex 1: From a special dir, start bash from bash
