@@ -1,13 +1,8 @@
-LOCAL_PATH="/path/to/project/.workspace/bin"
-PATH=":$PATH:"
-PATH="${PATH/:$LOCAL_PATH:/:}"
-PATH="${PATH#:}"
-PATH="${PATH%:}"
-export PATH="$LOCAL_PATH:$PATH"
-unset LOCAL_PATH
+__cdinout_path_prepend "/path/to/project/.workspace/bin"
 
 export PROJECT_NAME="my_project_name"
 export _Z_DATA="/path/to/project/.workspace/var/.z"
+export BUILDKIT_COLORS="run=yellow:cancel=cyan:warning=white:error=red"
 
 # Set an env var with backup
 [ ! -z "$XDEBUG_MODE" ] && export XDEBUG_MODE_BKP="$XDEBUG_MODE"
