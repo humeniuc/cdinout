@@ -1,0 +1,40 @@
+export WINEPREFIX="$HOME/path/to/.wine_prefix"
+
+# go root
+,gr() {
+    cd "$HOME/path/to/.wine_prefix"
+}
+
+,make_wine_link() {
+    [ -z "$1" ] && { echo "path not set" >&2; return 1; }
+
+    # calea absolută către executabil
+    path="$(readlink -f "${1}" )"
+
+    # directorul executabilului wine
+    exe_path="$( dirname "${path}" )"
+    # filename-ul executabilului wine
+    exe_filename="$( basename "${path}" )"
+
+    # filename-ul link-ului
+    slug="wine-$( echo "${exe_filename}" | iconv -t ascii//TRANSLIT | sed -r "s/[^a-zA-Z0-9]+/-/g" | sed -r "s/^-+\|-+$//g" | tr "A-Z" "a-z" )"
+
+    target_dir="${HOME}/.local/bin/wine"
+    target_exe="${target_dir}/${slug}"
+
+    [ -f "${target_exe}" ] && { echo "link exists" >&2; return 1; }
+
+    mkdir -p "${target_dir}";
+
+    echo "#!/bin/bash" 1>"${target_exe}"
+    echo "" 1>>"${target_exe}"
+
+    printf "cd %q && WINEPREFIX=\"$HOME/path/to/.wine_prefix\" wine start %q" "${exe_path}" "${exe_filename}" 1>>"${target_exe}"
+
+    chmod u+x "${target_exe}"
+
+    echo "${target_exe} created" >&2
+    echo "" >&2
+    cat "${target_exe}" >&2
+    echo "" >&2
+}

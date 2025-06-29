@@ -1,0 +1,4 @@
+unset WINEPREFIX
+
+unset -f ,gr
+unset -f ,make_wine_link
