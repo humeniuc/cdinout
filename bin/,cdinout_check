@@ -1,0 +1,29 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(dirname "$( readlink -f "${BASH_SOURCE[0]}" )")"
+CDINOUT_ROOT="$(dirname "${SCRIPT_DIR}")"
+
+source "${CDINOUT_ROOT}/lib.sh"
+
+_error_message() {
+    [ -n "$1" ] && {
+        echo "$1" >&2
+        command -v /bin/notify-send >/dev/null && notify-send -- "$1"
+    }
+}
+
+_exit() {
+    [ -n "$1" ] && _error_message "$1"
+    exit "${2:-1}"
+}
+
+main()
+{
+    if [ -v "CDINOUT_PATH" ]; then
+        echo "Inside path ${CDINOUT_PATH}"
+    else
+        echo "Not inside a inout path"
+    fi
+}
+
+main "$@"
